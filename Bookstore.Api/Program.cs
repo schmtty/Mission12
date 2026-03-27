@@ -29,21 +29,37 @@ app.MapGet("/api/books", async (
     BookstoreContext context,
     int pageSize = 5,
     int pageNum = 1,
-    string sort = "asc") =>
+    string sort = "asc",
+    // Comma-separated list of categories to filter by (e.g., "Biography,Self-Help").
+    // If omitted or empty, results include all categories.
+    string? categories = null) =>
 {
     // Guards against invalid query values and very large page sizes.
     var normalizedPageSize = Math.Clamp(pageSize, 1, 100);
     var normalizedPageNum = Math.Max(pageNum, 1);
     var sortDescending = string.Equals(sort, "desc", StringComparison.OrdinalIgnoreCase);
 
-    // Sorts by title in ascending or descending order.
-    var query = sortDescending
-        ? context.Books.OrderByDescending(b => b.Title)
-        : context.Books.OrderBy(b => b.Title);
+    // Parses the categories filter into a list for LINQ "IN (...)" style filtering.
+    var categoryList = string.IsNullOrWhiteSpace(categories)
+        ? new List<string>()
+        : categories.Split(',', StringSplitOptions.TrimEntries)
+            .Where(c => !string.IsNullOrWhiteSpace(c))
+            .ToList();
 
-    // Count all books, then return only the requested page.
-    var totalBooks = await context.Books.CountAsync();
-    var books = await query
+    // Filters first, then sorts/paginates.
+    var filteredQuery = context.Books.AsQueryable();
+    if (categoryList.Count > 0)
+    {
+        filteredQuery = filteredQuery.Where(b => categoryList.Contains(b.Category));
+    }
+
+    var sortedQuery = sortDescending
+        ? filteredQuery.OrderByDescending(b => b.Title)
+        : filteredQuery.OrderBy(b => b.Title);
+
+    // Count after filtering, then return only the requested page.
+    var totalBooks = await filteredQuery.CountAsync();
+    var books = await sortedQuery
         .Skip((normalizedPageNum - 1) * normalizedPageSize)
         .Take(normalizedPageSize)
         .ToListAsync();
@@ -53,6 +69,18 @@ app.MapGet("/api/books", async (
         books,
         totalBooks
     });
+});
+
+// Used to populate the category filter UI.
+app.MapGet("/api/categories", async (BookstoreContext context) =>
+{
+    var categories = await context.Books
+        .Select(b => b.Category)
+        .Distinct()
+        .OrderBy(c => c)
+        .ToListAsync();
+
+    return Results.Ok(categories);
 });
 
 app.Run();

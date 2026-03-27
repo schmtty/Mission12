@@ -12,6 +12,8 @@ The app displays books from the database and supports:
 - Pagination (default 5 books per page)
 - User-selectable page size
 - Sorting by book title (A to Z / Z to A)
+- Category filtering with pagination that updates based on the selected categories
+- A session-persistent shopping cart (offcanvas) with a cart summary
 
 ## Project Structure
 
@@ -69,3 +71,4 @@ npm run format
 
 - The frontend is configured to proxy `/api` requests to `http://localhost:5000`.
 - The API uses the SQLite connection string from `Bookstore.Api/appsettings.json`.
+- Bonus Bootstrap feature documentation is in `bootstrap.md` (Offcanvas + Tooltips).
