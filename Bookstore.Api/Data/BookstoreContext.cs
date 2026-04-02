@@ -28,7 +28,10 @@ public partial class BookstoreContext : DbContext
             entity.HasIndex(e => e.BookId, "IX_Books_BookID").IsUnique();
 
             // Maps C# property names to exact column names in the table.
-            entity.Property(e => e.BookId).HasColumnName("BookID");
+            // BookID is INTEGER PRIMARY KEY AUTOINCREMENT in SQLite.
+            entity.Property(e => e.BookId)
+                .HasColumnName("BookID")
+                .ValueGeneratedOnAdd();
             entity.Property(e => e.Isbn).HasColumnName("ISBN");
         });
 

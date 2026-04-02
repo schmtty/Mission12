@@ -1,5 +1,6 @@
 import { Tooltip } from 'bootstrap'
 import { useEffect, useMemo, useState } from 'react'
+import { apiUrl } from '../lib/apiUrl'
 import type { Book, BooksResponse } from '../types'
 import { useCart } from '../state/cart'
 import BookTable from '../components/BookTable'
@@ -46,7 +47,7 @@ export default function BookCatalogPage() {
         setLoadingCategories(true)
         setError('')
 
-        const response = await fetch('/api/categories')
+        const response = await fetch(apiUrl('/api/categories'))
         if (!response.ok) {
           throw new Error('Failed to load categories.')
         }
@@ -78,7 +79,9 @@ export default function BookCatalogPage() {
           url += `&categories=${encodeURIComponent(selectedCategoriesKey)}`
         }
 
-        const response = await fetch(url, { signal: abortController.signal })
+        const response = await fetch(apiUrl(url), {
+          signal: abortController.signal,
+        })
 
         if (!response.ok) {
           throw new Error('Failed to load books.')
