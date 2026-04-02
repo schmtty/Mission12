@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/7bdc0b94-20b5-483a-933c-06163c822a5b/resourceGroups/appsvc_windows_eastus/providers/Microsoft.Web/sites/amazin-bookstore",
+    "appService.deploySubpath": "Bookstore.Api\\publish"
+}
